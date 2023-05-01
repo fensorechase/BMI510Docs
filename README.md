@@ -14,7 +14,7 @@ This repository contains 20 R functions with Roxygen documentation for the BMI 5
 The following R packages are required:
 ```sh
 testthat
-Roxygen
+Roxygen2
 ```
 
 
@@ -34,6 +34,11 @@ devtools::install_github("https://github.com/fensorechase/BMI510Docs")
 Testing can be performed by running the following in the R console: 
 ```sh
 testthat::test_file("R/bmi510-tests.R")
+```
+
+If you'd like to implement new functions for testing and documentation generation in the file R/bmi510-template.R, please implement the function and Roxygen2 commenting as seen with the other functions. Then to use Roxygen2 to automatically generate the Rd files in the 'man' directory, run the following in the R console: 
+```sh
+devtools::document()
 ```
 
 ## Materials
