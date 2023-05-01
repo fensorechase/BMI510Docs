@@ -30,9 +30,9 @@ rando = function(x,n=1,replace=T){
   # if x i a dataframe-like object, return n rows.
   else if(is.data.frame(x) || is.matrix(x)){
     n_rows <- nrow(x)
-    if( n > n_rows) {
-      stop("sample size exceeds number of rows in dataframe/matrix")
-    }
+    #if( n > n_rows) {
+    #  stop("sample size exceeds number of rows in dataframe/matrix")
+    #}
     row_samps <- sample(seq_len(n_rows), n, replace)
     return(x[row_samps, ])
   }
@@ -106,12 +106,12 @@ is_max = function(x,na.rm=T){
 #' rep_mat(x, M = 3, N = 2) # Replicate rows 3 times and columns 2 times
 #' @export
 rep_mat = function(x, M=1, N=1){
-  if (!is.matrix(x) && !is.data.frame(x)) {
-    stop("x must be a matrix or data frame")
-  }
-  if (M <= 0 || N <= 0) {
-    stop("M and N must be positive integers")
-  }
+  #if (!is.matrix(x) && !is.data.frame(x)) {
+  #  stop("x must be a matrix or data frame")
+  #}
+  #if (M <= 0 || N <= 0) {
+  #  stop("M and N must be positive integers")
+  #}
   if (M == 1 && N == 1) {
     return(x)
   }
@@ -138,7 +138,7 @@ rep_mat = function(x, M=1, N=1){
 #' classes(x)
 #' @export
 classes = function(x) {
-  stopifnot(tibble::is_tibble(x))
+  #stopifnot(tibble::is_tibble(x))
   return(sapply(x, class))
 }
 
@@ -158,7 +158,7 @@ classes = function(x) {
 #' df_scale(x)
 #' @export
 df_scale = function(x, center = TRUE, scale = TRUE) {
-  stopifnot(tibble::is_tibble(x))
+  #stopifnot(tibble::is_tibble(x))
   num_vars <- which(sapply(x, is.numeric))
   if (length(num_vars) == 0) {
     return(x)
@@ -181,7 +181,7 @@ df_scale = function(x, center = TRUE, scale = TRUE) {
 #' log_likelihood_norm(c(1,2,3), mean = 2, sd = 1)
 #' @export
 log_likelihood_norm = function(x, mean, sd) {
-  stopifnot(is.numeric(x), is.numeric(mean), is.numeric(sd), length(mean) == 1, length(sd) == 1)
+  #stopifnot(is.numeric(x), is.numeric(mean), is.numeric(sd), length(mean) == 1, length(sd) == 1)
   n <- length(x)
   loglik <- -n/2 * log(2*pi) - n*log(sd) - sum((x - mean)^2) / (2*sd^2)
   return(loglik)
@@ -200,10 +200,10 @@ log_likelihood_norm = function(x, mean, sd) {
 #' log_likelihood_unif(c(0.5, 0.8, 1), min = 0, max = 1)
 #' @export
 log_likelihood_unif = function(x, min, max) {
-  stopifnot(is.numeric(x), is.numeric(min), is.numeric(max), length(min) == 1, length(max) == 1)
-  if (min >= max) {
-    stop("min must be less than max")
-  }
+  #stopifnot(is.numeric(x), is.numeric(min), is.numeric(max), length(min) == 1, length(max) == 1)
+  #if (min >= max) {
+  #  stop("min must be less than max")
+  #}
   n <- length(x)
   loglik <- -n*log(max - min)
   if (any(x < min) || any(x > max)) {
@@ -237,9 +237,9 @@ log_likelihood_unif = function(x, min, max) {
 #' @importFrom stats dchisq
 #' @export
 log_likelihood_chisq = function(x, df) {
-  if (!is.numeric(x) || any(x < 0)) {
-    stop("x must be a numeric vector with non-negative values")
-  }
+  #if (!is.numeric(x) || any(x < 0)) {
+  #  stop("x must be a numeric vector with non-negative values")
+  #}
   #if (!is.numeric(df) || df <= 0 || !is.integer(df)) {
   #  stop("df must be a positive integer")
   #}
@@ -269,7 +269,7 @@ log_likelihood_f = function(x, df1, df2) {
   if (any(x <= 0)) {
     return(NA)
   }
-  loglik <- sum(stats::df(x, df1 = df1, df2 = df2, log = TRUE))
+  loglik <- sum(df(x, df1 = df1, df2 = df2, log = TRUE))
   return(loglik)
 }
 
@@ -286,8 +286,9 @@ log_likelihood_f = function(x, df1, df2) {
 #' @importFrom stats dt
 #' @importFrom stats dnorm
 log_likelihood_t = function(x, df) {
-  sum(stats::dnorm(x, mean = 0, sd = sqrt(df/(df-2)), log = TRUE) - log(stats::dt(x, df, log = FALSE)))
+  sum(log(dt(x, df=df)))
 }
+
 
 #' Calculate sensitivity metric based on predicted and true labels
 #'
@@ -420,9 +421,9 @@ recall = function(pred, truth) {
 #'
 #' @export
 accuracy = function(pred, truth) {
-  if(length(pred) != length(truth)) {
-    stop("Length of pred and truth vectors must match")
-  }
+  #if(length(pred) != length(truth)) {
+  #  stop("Length of pred and truth vectors must match")
+  #}
   correct <- sum(pred == truth)
   total <- length(pred)
   return(correct / total)
@@ -462,10 +463,9 @@ f1 = function(pred, truth) {
 #' minimum_n_per_group(0.5)
 #' minimum_n_per_group(0.8, 0.9)
 minimum_n_per_group = function(d, power = 0.8) {
-  power <- ifelse(power > 1, 1, power) # ensure power is not greater than 1
-  qt(power/2 + 0.5, df = 2*(ceiling(1/(d^2/power)))-2)
+  min_n <- ceiling(power.t.test(power = power, delta = d)$n) # Round to higher integer.
+  return(min_n)
 }
-
 
 #' Calculate R-squared
 #'
@@ -477,11 +477,10 @@ minimum_n_per_group = function(d, power = 0.8) {
 #' @examples
 #' r2(c(1, 2, 3), c(1.1, 1.8, 2.9))
 r2 = function(pred, truth) {
-  ssr <- sum((pred - mean(truth))^2)
-  sst <- sum((truth - mean(truth))^2)
-  return(ssr/sst)
+  ssr <- sum((truth - pred)^2) # SS resids
+  sst <- sum((truth - mean(truth))^2) # SS total
+  return(1-(ssr/sst))
 }
-
 
 
 #' Calculate the adjusted R-squared between predicted and ground truth continuous variables
@@ -506,6 +505,3 @@ adj_R2 = function(pred, truth, n_p) {
   adj_r2 <- 1 - ((1 - r2) * (n - 1)) / (n - n_p - 1)
   return(adj_r2)
 }
-
-
-testthat::test_file("R/bmi510-tests.R")
