@@ -12,11 +12,11 @@
 #' @examples
 #' # sample from an atomic vector
 #' rando(1:10, 3, replace = TRUE)
-#' 
+#'
 #' # sample from a dataframe
 #' df <- data.frame(x = 1:5, y = 6:10)
 #' rando(df, 2, replace = TRUE)
-#' 
+#'
 #' # error case
 #' rando(list(1, 2, 3), 2)
 #'
@@ -240,36 +240,36 @@ log_likelihood_chisq = function(x, df) {
   if (!is.numeric(x) || any(x < 0)) {
     stop("x must be a numeric vector with non-negative values")
   }
-  if (!is.numeric(df) || df <= 0 || !is.integer(df)) {
-    stop("df must be a positive integer")
-  }
-  loglik <- stats::sum(stats::dchisq(x, df, log = TRUE))
+  #if (!is.numeric(df) || df <= 0 || !is.integer(df)) {
+  #  stop("df must be a positive integer")
+  #}
+  loglik <- sum(stats::dchisq(x, df, log = TRUE))
   return(loglik)
 }
 
 
 #' Compute log-likelihood of sample x under the f distribution.
-#' 
+#'
 #' This function computes the log-likelihood of a sample x under the F distribution with parameters df1 and df2.
-#' 
+#'
 #' @param x A numeric vector of observations.
 #' @param df1 Degrees of freedom for the numerator.
 #' @param df2 Degrees of freedom for the denominator.
-#' 
+#'
 #' @return The log-likelihood of the sample x under the F distribution with parameters df1 and df2.
-#' 
+#'
 #' @examples
 #' x <- rf(100, df1 = 5, df2 = 10)
 #' log_likelihood_f(x, df1 = 5, df2 = 10)
-#' 
+#'
 #' @seealso \code{\link{df}}, \code{\link{logLik}}
-#' @import stats
+#' @import stats df
 #' @export
 log_likelihood_f = function(x, df1, df2) {
   if (any(x <= 0)) {
     return(NA)
   }
-  loglik <- stats::sum(dfo(x, df1 = df1, df2 = df2, log = TRUE))
+  loglik <- sum(stats::df(x, df1 = df1, df2 = df2, log = TRUE))
   return(loglik)
 }
 
@@ -284,9 +284,9 @@ log_likelihood_f = function(x, df1, df2) {
 #' @examples
 #' log_likelihood_t(x = c(1.2, 0.9, -0.3), df = 4)
 #' @importFrom stats dt
-#' @importFrom stats sum log
+#' @importFrom stats dnorm
 log_likelihood_t = function(x, df) {
-  sum(stats::dnorm(x, mean = 0, sd = sqrt(df/(df-2)), log = TRUE) - stats::log(stats::dt(x, df, log = FALSE)))
+  sum(stats::dnorm(x, mean = 0, sd = sqrt(df/(df-2)), log = TRUE) - log(stats::dt(x, df, log = FALSE)))
 }
 
 #' Calculate sensitivity metric based on predicted and true labels
@@ -294,7 +294,7 @@ log_likelihood_t = function(x, df) {
 #' This function takes in two vectors of binary labels, the predicted labels and the true labels,
 #' and calculates the sensitivity (true positive rate) of the predictions with respect to the true
 #' labels. Sensitivity is the proportion of true positives (TP) out of all actual positives (TP + FN).
-#' 
+#'
 #' @param pred A numeric vector of predicted binary labels (0 or 1)
 #' @param truth A numeric vector of true binary labels (0 or 1)
 #'
@@ -313,19 +313,19 @@ sensitivity = function(pred, truth) {
 }
 
 #' Calculate specificity metric
-#' 
+#'
 #' This function calculates the specificity metric based on comparing predicted and truth labels.
-#' 
+#'
 #' @param pred a vector of predicted labels
 #' @param truth a vector of true labels
-#' 
+#'
 #' @return a numeric value representing the specificity metric
-#' 
+#'
 #' @examples
 #' specificity(c(0,0,1,1), c(1,0,1,0)) # returns 0.5
 #' specificity(c(0,0,1,1), c(0,0,0,0)) # returns 1
 #' specificity(c(0,0,1,1), c(1,1,1,1)) # returns 0
-#' 
+#'
 #' @export
 specificity = function(pred, truth) {
   tn <- sum(!pred & !truth)
@@ -333,7 +333,7 @@ specificity = function(pred, truth) {
   return(tn / (tn + fp))
 }
 
-  
+
 
 #' Calculate precision metric for predicted and truth labels
 #'
@@ -355,13 +355,13 @@ specificity = function(pred, truth) {
 precision = function(pred, truth) {
   # Calculate the number of true positive predictions
   true_positives <- sum(pred == 1 & truth == 1)
-  
+
   # Calculate the total number of positive predictions
   predicted_positives <- sum(pred == 1)
-  
+
   # Calculate precision as the proportion of true positives out of all positive predictions
   precision_value <- true_positives / predicted_positives
-  
+
   return(precision_value)
 }
 
@@ -371,14 +371,14 @@ precision = function(pred, truth) {
 #' Calculate Recall
 #'
 #' This function calculates the recall metric based on comparing predicted and truth labels.
-#' Recall, also known as sensitivity or true positive rate, measures the proportion of actual positives 
+#' Recall, also known as sensitivity or true positive rate, measures the proportion of actual positives
 #' that are correctly identified by the model.
-#' 
+#'
 #' @param pred A vector of predicted labels
 #' @param truth A vector of true labels
-#' 
+#'
 #' @return A scalar value representing the recall score.
-#' 
+#'
 #' @examples
 #' pred <- c(1, 1, 0, 1, 0, 1)
 #' truth <- c(1, 0, 0, 1, 1, 1)
@@ -389,7 +389,7 @@ precision = function(pred, truth) {
 recall = function(pred, truth) {
   tp <- sum(pred == 1 & truth == 1)
   fn <- sum(pred == 0 & truth == 1)
-  
+
   if (tp + fn == 0) {
     return(0)
   } else {
@@ -468,9 +468,9 @@ minimum_n_per_group = function(d, power = 0.8) {
 
 
 #' Calculate R-squared
-#' 
+#'
 #' This function calculates the R-squared statistic between predicted and ground truth continuous variables.
-#' 
+#'
 #' @param pred A numeric vector of predicted values.
 #' @param truth A numeric vector of ground truth values.
 #' @return A numeric value representing the R-squared statistic.
@@ -506,3 +506,6 @@ adj_R2 = function(pred, truth, n_p) {
   adj_r2 <- 1 - ((1 - r2) * (n - 1)) / (n - n_p - 1)
   return(adj_r2)
 }
+
+
+testthat::test_file("R/bmi510-tests.R")
